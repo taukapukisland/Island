@@ -6,7 +6,7 @@ import { ConnectButton, TransactionButton, useActiveAccount, useReadContract } f
 import { NFT_CONTRACT, STAKING_CONTRACT } from "../src/app/utils/contracts";
 import { NFT, prepareContractCall, sendTransaction, Hex } from "thirdweb";
 import { useEffect, useState } from "react";
-import { approve, startTokenId } from "thirdweb/extensions/erc721";
+import { approve } from "thirdweb/extensions/erc721";
 import { NFTCard } from "./NFTCard";
 import { getOwnedERC721s } from "./get"
 import { StakedNFTCard } from "./StakedNFTCard";
@@ -57,18 +57,13 @@ export const Staking = () => {
        });*/
 
        
-       type OwnedNFTsProps = {
-        nft: NFT;
-        refetchOwnedNFTs: () => void;
-        refetchStakedInfo: () => void;
-    };
-       const [isModalOpen, setIsModalOpen] = useState(false);
-       const [isApproved, setIsApproved] = useState(false);
+
 
 
     if (account) {
-        return (
 
+        return (
+            
             <div style={{
                 display: "flex",
                 flexDirection: "column",
@@ -100,97 +95,21 @@ export const Staking = () => {
 
                 
 
-                <div style={{margin: "10px"}}>
-            <button
-                onClick={() => setIsModalOpen(true)}
-                style={{
-                    border: "none",
-                    backgroundColor: "#333",
-                    color: "#fff",
-                    padding: "10px",
-                    borderRadius: "10px",
-                    cursor: "pointer",
-                    width: "100%"
-                }}
-                >Stake All
-            </button>
-            {isModalOpen && (
-               <div style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center"
-               }}>
-                <div style={{
-                    minWidth: "300px",
-                    backgroundColor: "#222",
-                    padding: "20px",
-                    borderRadius: "10px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center"
-                }}>
-                    <div style={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        width: "100%"
-                    }}>
-                    <button
-                        onClick={() => setIsModalOpen(false)}
-                        style={{
-                            border: "none",
-                            backgroundColor: "transparent",
-                            color: "#fff",
-                            cursor: "pointer"
-                        }}
-                    >
-                    Close</button>
-                    </div>
-                    <h3 style={{margin: "10px 0"}}>You are about to stake ALL!</h3>
-                        {!isApproved ? (
-                            <TransactionButton
-                            transaction={() => (
-                                approve({
-                                    contract: NFT_CONTRACT,
-                                    to: STAKING_CONTRACT.address,
-                                    tokenId: BigInt(0)
-                                })
-                            )}
-                            style={{
-                                width: "100%"
-                            }}
-                            onTransactionConfirmed={() => setIsApproved(true)}
-                            >Approve</TransactionButton>
-                        ) : (
-                            <TransactionButton
-                            transaction={() => (
-                                prepareContractCall({
-                                    contract: STAKING_CONTRACT,
-                                    method: "stake",
-                                    params: [[BigInt(0)]]
-                                })
-                            )}
-                            onTransactionConfirmed={() => {
-                                alert("Staked!");
-                                setIsModalOpen(false);
-                                getOWnedNFTs();
-                                refetchStakedInfo();
-                            }}
-                            style={{
-                                width: "100%"
-                            }}
-                            >Stake</TransactionButton>
-                        )}
-                </div>
-            </div>
-        )}
-        </div>
 
+                <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", width: "500px" }}>
+                        { ownedNFTs.length ? (
+                            ownedNFTs.map((nft) => (
+                <StakedAll
+                    nft={nft}
+                    refetchOwnedNFTs={getOWnedNFTs}
+                    refetchStakedInfo={refetchStakedInfo}
+                />
+            ))
+        ) : (
+            <center><img src="https://lh3.googleusercontent.com/d/1axH8W_Xfs-hbB0fF6iP9EF9XU26sukVk=w25" /></center>
+        )}
+    </div>
+            
 
 
 
