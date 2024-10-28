@@ -6,12 +6,11 @@ import { ConnectButton, TransactionButton, useActiveAccount, useReadContract } f
 import { NFT_CONTRACT, STAKING_CONTRACT } from "../src/app/utils/contracts";
 import { NFT, prepareContractCall, sendTransaction, Hex } from "thirdweb";
 import { useEffect, useState } from "react";
-import { approve } from "thirdweb/extensions/erc721";
+import { getNFTs, ownerOf, totalSupply, claimTo, getOwnedNFTs } from "thirdweb/extensions/erc721";
 import { NFTCard } from "./NFTCard";
 import { getOwnedERC721s } from "./get"
 import { StakedNFTCard } from "./StakedNFTCard";
 import { StakeRewards } from "./StakeRewards";
-import { StakedAll } from "./StakedAll";
 
 export const Staking = () => {
     const account = useActiveAccount();
@@ -44,8 +43,6 @@ export const Staking = () => {
     });
 
 
-
-
     /*const Etransaction = prepareContractCall({
         contract: NFT_CONTRACT,
         method: "function transfer(address to, uint256 value)",
@@ -54,16 +51,26 @@ export const Staking = () => {
         const { transactionHash } = await sendTransaction({
          account,
          transaction: Etransaction,
-       });*/
+       });*/const [isApproved, setIsApproved]  = useState(false);
 
-       
+       async function stakeNft(id: string) {
+        if (!account) return;
+      
+        const isApproval = await NFT_CONTRACT?.isApproval(
+          account?.address || "",
+          STAKING_CONTRACT
+        );
+        if (!isApproval) {
+          await NFT_CONTRACT?.setIsApproved(STAKING_CONTRACT, true);
+        }
+        await STAKING_CONTRACT?.isApproved("stake", [id]);
+
 
 
 
     if (account) {
-
         return (
-            
+
             <div style={{
                 display: "flex",
                 flexDirection: "column",
@@ -91,33 +98,22 @@ export const Staking = () => {
                     width: "100%",
                     border: "1px solid #333"
                 }} />
-                
-
-                
-
-
-                <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", width: "500px" }}>
-                        { ownedNFTs.length ? (
-                            ownedNFTs.map((nft) => (
-                <StakedAll
-                    nft={nft}
-                    refetchOwnedNFTs={getOWnedNFTs}
-                    refetchStakedInfo={refetchStakedInfo}
-                />
-            ))
-        ) : (
-            <center><img src="https://lh3.googleusercontent.com/d/1axH8W_Xfs-hbB0fF6iP9EF9XU26sukVk=w25" /></center>
-        )}
-    </div>
-            
-
-
-
                 <div style={{
                     margin: "20px 0",
                     width: "100%"
                 }}>
-
+<div>
+{ownedNFTs?.map((nft) => (
+    <div key={nft.id.toString()}>
+         <TransactionButton
+        contractAddress={STAKING_CONTRACT}
+        action={() => stakeNft(nft.id)}
+      >
+        Stake All
+      </TransactionButton>
+    </div>
+  ))}
+</div>
                     <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", width: "500px" }}>
                         {ownedNFTs && ownedNFTs.length > 0 ? (
                             ownedNFTs.map((nft) => (
@@ -164,4 +160,4 @@ export const Staking = () => {
         )
     }
 
-}
+}}
